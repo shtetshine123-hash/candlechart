@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TRX CANDLE ENGINE | PURE CHART WITH BET</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loginOverlay">
+    <div class="login-card">
+        <h2>🔐 TRX CANDLE</h2>
+        <p>Enter credentials & click platform to login</p>
+        <div class="platform-selector" id="platformSelector">
+            <button class="platform-btn" data-platform="6LOTTERY">🔥 6LOTTERY</button>
+            <button class="platform-btn active" data-platform="777BIGWIN">💚 777 BIGWIN</button>
+            <button class="platform-btn" data-platform="CKLOTTERY">💙 CK LOTTERY</button>
+        </div>
+        <label>👤 Username (Phone)</label>
+        <input type="text" id="loginUsername" placeholder="9xxxxxxxxx" inputmode="numeric" pattern="[0-9]*" autocomplete="tel">
+        <label>🔑 Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter your password">
+        <div id="loginStatus" class="login-status"></div>
+        <div id="loadingProgress" class="loading-text" style="display:none;"></div>
+        <div id="loginError" class="error-text"></div>
+    </div>
+</div>
+
+<div id="toastWarning" class="toast-warning">⚠️ ကျေးဇူးပြု၍ မြှောက်ကိန်း ထည့်ပါ</div>
+<div id="toastSuccess" class="toast-success">✅ အောင်မြင်ပါသည်</div>
+
+<div id="resultPopup">
+    <div class="result-inner">
+        <div class="result-header">🎯 Lottery Results</div>
+        <div id="resultStatus" style="font-size: 1.2rem; font-weight: 900; margin-bottom: 10px;">--</div>
+        <div class="result-row">
+            <span class="label">Lottery results</span>
+            <span class="badge" id="resultColorBadge">--</span>
+            <span class="value number" id="resultNumberDisplay">0</span>
+            <span class="value" id="resultTitle">--</span>
+        </div>
+        <div class="result-period" id="resultPeriod"></div>
+        <div class="balance-change" id="resultBalanceChange"></div>
+        <button class="close-btn" onclick="closeResultPopup()">OK</button>
+    </div>
+</div>
+
+<div id="betModalOverlay" class="bet-modal-overlay">
+    <div class="bet-modal">
+        <div id="modalHeaderType" class="modal-header-type big">BET BIG</div>
+        <div class="quick-amounts" id="quickAmountsContainer">
+            <button class="amount-btn" data-amount="100">100</button>
+            <button class="amount-btn" data-amount="500">500</button>
+            <button class="amount-btn" data-amount="1000">1K</button>
+            <button class="amount-btn" data-amount="10000">10K</button>
+            <button class="amount-btn" data-amount="100000">100K</button>
+        </div>
+        <div class="multiplier-zone">
+            <span class="mult-label">မြှောက်ကိန်း</span>
+            <div class="mult-controls">
+                <button class="mult-btn" id="multMinus">-</button>
+                <input type="text" id="multValueInput" class="mult-value" placeholder="ထည့်ပါ" inputmode="numeric" pattern="[0-9]*" value="">
+                <button class="mult-btn" id="multPlus">+</button>
+            </div>
+        </div>
+        <div class="mult-presets" id="multPresets">
+            <span class="mult-preset" data-mult="1">1x</span>
+            <span class="mult-preset" data-mult="5">5x</span>
+            <span class="mult-preset" data-mult="10">10x</span>
+            <span class="mult-preset" data-mult="20">20x</span>
+            <span class="mult-preset" data-mult="50">50x</span>
+            <span class="mult-preset" data-mult="100">100x</span>
+        </div>
+        <div class="total-display-row">
+            <span class="total-label">စုစုပေါင်း ပမာဏ:</span>
+            <span class="total-val" id="totalBetDisplay">0 ကျပ်</span>
+        </div>
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">ပယ်ဖျက်</button>
+            <button class="modal-btn modal-btn-confirm" id="modalConfirmBtn">လောင်းမည်</button>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard rotated" id="mainDashboard">
+    <div class="chart-fullscreen">
+        <div class="chart-header">
+            <div class="header-left-zone">
+                <div class="chart-title"><i class="fa-solid fa-chart-simple"></i> TRX</div>
+                <div class="balance-display" id="balanceDisplay" style="display:none;">
+                    <i class="fa-solid fa-wallet"></i>
+                    Balance: <span class="balance-amount" id="balanceAmount">0.00</span> ကျပ်
+                </div>
+                <div class="color-legend">
+                    <div class="legend-item"><div class="legend-box legend-big"></div><span>BIG</span></div>
+                    <div class="legend-item"><div class="legend-box legend-small"></div><span>SMALL</span></div>
+                </div>
+            </div>
+            <div class="chart-controls">
+                <button class="history-btn" id="historyToggleBtn"><i class="fa-regular fa-clock"></i> History</button>
+            </div>
+        </div>
+        <div class="info-bar" id="infoBarZone">
+            <div class="period-group">
+                <div class="period-item">
+                    <div class="period-item-label">Next Period</div>
+                    <div class="period-item-value" id="nextPeriodDisplay">--</div>
+                </div>
+                <div class="period-item">
+                    <div class="period-item-label">Countdown</div>
+                    <div class="timer-value" id="countdownTimer">--:--</div>
+                </div>
+            </div>
+            <div class="patterns-badge-container">
+                <span class="patterns-label"><i class="fa-regular fa-chart-scatter"></i> PATTERNS</span>
+                <div class="pattern-list" id="patternListArea">
+                    <span class="pattern-badge pattern-neutral">loading...</span>
+                </div>
+            </div>
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                <span id="lastUpdateTime">--:--:--</span>
+            </div>
+        </div>
+        <div class="chart-container" id="chartContainer">
+            <canvas id="candleChart"></canvas>
+            <div class="chart-overlay-info" id="chartTooltip">
+                <div class="overlay-header">
+                    <div class="overlay-title"><i class="fa-regular fa-calendar"></i> Candle Data</div>
+                    <div class="overlay-period" id="tooltipPeriod">-</div>
+                </div>
+                <div class="overlay-grid">
+                    <div class="overlay-item"><div class="overlay-label">OPEN</div><div class="overlay-value" id="tooltipOpen">-</div></div>
+                    <div class="overlay-item"><div class="overlay-label">HIGH</div><div class="overlay-value" id="tooltipHigh">-</div></div>
+                    <div class="overlay-item"><div class="overlay-label">LOW</div><div class="overlay-value" id="tooltipLow">-</div></div>
+                    <div class="overlay-item"><div class="overlay-label">CLOSE</div><div class="overlay-value" id="tooltipClose">-</div></div>
+                    <div class="overlay-item"><div class="overlay-label">NUMBER</div><div class="overlay-value" id="tooltipNumber">-</div></div>
+                    <div class="overlay-item"><div class="overlay-label">RESULT</div><div class="overlay-value" id="tooltipResult">-</div></div>
+                </div>
+                <div class="overlay-ta-row">
+                    <span style="font-size:0.65rem;">TREND: </span><strong id="tooltipTrend">-</strong>
+                    <span style="font-size:0.65rem;">MOM: </span><strong id="tooltipMomentum">-</strong>
+                </div>
+            </div>
+        </div>
+        <div class="betting-panel">
+            <div class="bet-actions">
+                <button class="bet-btn bet-btn-big" id="betBigBtn"><i class="fa-solid fa-arrow-trend-up"></i> Bet BIG</button>
+                <button class="bet-btn bet-btn-small" id="betSmallBtn"><i class="fa-solid fa-arrow-trend-down"></i> Bet SMALL</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="history-panel" id="historyPanel">
+    <div class="history-card">
+        <h3>📜 Betting History</h3>
+        <div id="historyList"></div>
+        <button class="history-close-btn" id="historyCloseBtn">Close</button>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
