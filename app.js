@@ -230,7 +230,7 @@ async function fetchAllTRXHistory(progressEl, statusEl) {
             payload.signature = generateSignature(payload);
             payload.timestamp = Math.floor(Date.now() / 1000);
 
-            progressEl.innerText = `Fetching page ${page}/40... (${allGames.length} items loaded)`;
+            progressEl.innerText = `Fetching page ${page}/1440... (${allGames.length} items loaded)`;
 
             const res = await fetch(baseUrl + "GetTRXNoaverageEmerdList", {
                 method: 'POST',
