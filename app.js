@@ -3,7 +3,7 @@ const PLATFORMS = {
     "777BIGWIN": "https://api.bigwinqaz.com/api/webapi/",
     "CKLOTTERY": "https://ckygjf6r.com/api/webapi/"
 };
-const MAX_CANDLES = 500;
+const MAX_CANDLES = 1440;
 const STORAGE_CANDLES = "trx_candle_pure_data";
 const STORAGE_HISTORY = "trx_bet_history";
 const MYANMAR_OFFSET = 6.5 * 60 * 60 * 1000;
@@ -219,7 +219,7 @@ async function fetchAllTRXHistory(progressEl, statusEl) {
         };
         let allGames = [];
         statusEl.innerText = `📥 Loading history candles...`;
-        for (let page = 1; page <= 40; page++) {
+        for (let page = 1; page <= 144; page++) {
             const payload = {
                 pageSize: 10,
                 pageNo: page,
